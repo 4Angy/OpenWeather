@@ -1,46 +1,62 @@
-import requests
-from flask import Flask, jsonify, request
+
+import time
+import var,requests
 from dotenv import load_dotenv
-import os
+import os 
+
 
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
-
 API_KEY = os.getenv('API_KEY')
+def menu():
+    op=""
+   
+    while(op != "s"):
+         print("     * * * Menú Principal * * *")
+         print("-----------------------------------")
+         print("a.Elejir ciudad\nb.Cambiar de unidad\nS.Salir de la aplicacion")
+         op=input("Elija su opcion: ")
+         op=op.lower()
+         if op == "a":
+            get_weather()
+         elif op == "b":
+            var.Unidades()
+            var.Medida()
+         elif op == "s":
+            despedida="Saliendo . . ."
+            for caracter in despedida:
+                print(caracter,end=" ")
+                time.sleep(0.5)
+         else:
+            print("Dato invalido , vuelva a intentar")
 
-@app.route('/weather', methods=['GET'])
 def get_weather():
-    city_name = request.args.get('city')
-    if not city_name:
-        return jsonify({"error": "Por favor, proporcione una ciudad"}), 400
-    
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={API_KEY}&units=metric&lang=es"
+    var.ciudad()
+    medida=var.medida
+    units=var.units
+    ciudad=var.city
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units={units}&lang=es"
     response = requests.get(url)
     
     if response.status_code == 200:
         clima = response.json()
-        formatted_response = {
-            "Ubicación": clima.get("name"),
-            "Temperatura": f"{clima['main']['temp']}°C",
-            "Sensación Térmica": f"{clima['main']['feels_like']}°C",
-            "Temperatura Mínima": f"{clima['main']['temp_min']}°C",
-            "Temperatura Máxima": f"{clima['main']['temp_max']}°C",
-            "Presión": f"{clima['main']['pressure']} hPa",
-            "Humedad": f"{clima['main']['humidity']}%",
-            "Viento": {
-                "Velocidad": f"{clima['wind']['speed']} m/s",
-                "Dirección": f"{clima['wind']['deg']}°"
-            },
-            "Tiempo": clima['weather'][0]['description'],
-            "Visibilidad": f"{clima['visibility']} metros",
-            "Amanecer": clima['sys']['sunrise'],
-            "Atardecer": clima['sys']['sunset']
-        }
-        return jsonify(formatted_response)
+        print(f"""        Ubicación: , {clima.get("name")}
+        Temperatura: {clima['main']['temp'],medida}
+        Sensación Térmica: {clima['main']['feels_like'], medida}
+        Temperatura Mínima: {clima['main']['temp_min'], medida}
+        Temperatura Máxima": {clima['main']['temp_max'], medida}
+        Presión: {clima['main']['pressure']} hPa
+        Humedad: {clima['main']['humidity']}%
+        Viento: Velocidad: {clima['wind']['speed']} m/s
+                Dirección: {clima['wind']['deg']}°
+        Tiempo: {clima['weather'][0]['description']}
+        Visibilidad: {clima['visibility']} metros""")
+    elif response.status_code == 404:
+        print("La ciudad ingresada no existe , por favor ingrese una ciudad valida")
+        get_weather()
     else:
-        return jsonify({"error": f"Error: {response.status_code}"}), response.status_code
+        print(f"Error: {response.status_code}")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+
+menu()
