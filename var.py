@@ -33,7 +33,10 @@ def ciudad ():
     while(True):
         city=input("Ingrese el nombre de la ciudad: ")
         if city == "":
-            print("No puede dejar este campo vacio ...")
+         print("No puede dejar este campo vacio ...")
+        elif all(caracter.isdigit() for caracter in city ):
+         print("No puede ingresar números ")
         else:
-            break
+         break
+    
 

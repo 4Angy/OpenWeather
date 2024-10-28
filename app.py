@@ -41,11 +41,11 @@ def get_weather():
     
     if response.status_code == 200:
         clima = response.json()
-        print(f"""        Ubicación: , {clima.get("name")}
-        Temperatura: {clima['main']['temp'],medida}
-        Sensación Térmica: {clima['main']['feels_like'], medida}
-        Temperatura Mínima: {clima['main']['temp_min'], medida}
-        Temperatura Máxima": {clima['main']['temp_max'], medida}
+        print(f"""        Ubicación:  {clima.get("name")}
+        Temperatura: {clima['main']['temp']}{medida}
+        Sensación Térmica: {clima['main']['feels_like']} {medida}
+        Temperatura Mínima: {clima['main']['temp_min']} {medida}
+        Temperatura Máxima": {clima['main']['temp_max']} {medida}
         Presión: {clima['main']['pressure']} hPa
         Humedad: {clima['main']['humidity']}%
         Viento: Velocidad: {clima['wind']['speed']} m/s
