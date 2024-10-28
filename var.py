@@ -6,7 +6,7 @@ city=""
 def Unidades():
     global opcion,units
     print("-----------------------\n Seleccione las unidades de medida:")
-    print("1.Celcius\n2.Fahrenheit\nS.Volver al menú principal")
+    print("1.Celcius\n2.Fahrenheit\n0.Volver al menú principal")
     while(opcion != "S"):
         opcion=input("Elija su opcion: ")
         if opcion=="1":
@@ -16,8 +16,8 @@ def Unidades():
             units="imperial"
             print("Eligio grados Fahrenheit")
             break
-        elif opcion == "S":
-            print("Opcion 0")
+        elif opcion == "0":
+            print("Volviendo...")
             break
 
         else:
