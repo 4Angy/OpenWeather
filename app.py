@@ -45,7 +45,7 @@ def get_weather():
     
     if response.status_code == 200:
         clima = response.json()
-        print(f"""        Ubicación:  {clima.get("name")}
+        resultado= f"""Ubicación:  {clima.get("name")}
         Temperatura: {clima['main']['temp']}{medida}
         Sensación Térmica: {clima['main']['feels_like']} {medida}
         Temperatura Mínima: {clima['main']['temp_min']} {medida}
@@ -58,6 +58,7 @@ def get_weather():
         Visibilidad: {clima['visibility']} metros"""
         print(resultado)
         historial.append(resultado)
+      
     elif response.status_code == 404:
         print("La ciudad ingresada no existe , por favor ingrese una ciudad valida")
         get_weather()
