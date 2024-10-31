@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  weather_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather_app_container
+    volumes:
+      - .:/app  # Sincroniza el código local con el contenedor
+    environment:
+      - API_KEY=${API_KEY}  # Pasa la API key desde .env al contenedor
+    command: python app.py  # Ejecuta el archivo principal
+    tty: true               # Habilita TTY para modo interactivo
+    stdin_open: true        # Mantiene stdin abierto para entrada de usuario
