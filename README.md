@@ -4,5 +4,4 @@ docker-compose up -d
 
 
 
-docker attach weather_app_container
-
+dockercompose run weather_app
