@@ -4,4 +4,4 @@ docker-compose up -d
 
 
 
-dockercompose run weather_app
+docker compose run weather_app
