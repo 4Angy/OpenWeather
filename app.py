@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import time
 import var, requests
 from dotenv import load_dotenv
@@ -8,9 +9,14 @@ from datetime import datetime, timedelta
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 historial = []
+=======
+import var
+>>>>>>> cb5e07ed6759a586210fbe1ce7f022c94c7b904f
 
+menu()
 def menu():
     op = ""
+<<<<<<< HEAD
     while op != "s":
         print(" * * * Menú Principal * * *")
         print("-----------------------------------")
@@ -64,9 +70,37 @@ def get_weather():
     elif response.status_code == 404:
         print("La ciudad ingresada no existe, por favor ingrese una ciudad válida")
         get_weather()
+=======
+while op != "s":
+    print(" * * * Menú Principal * * *")
+    print("-----------------------------------")
+    print("a. Elegir ciudad\nb. Cambiar de unidad\nc. Ver historial\nd. Clima de los próximos 5 días\nS. Salir de la aplicación")
+    op = input("Elija su opción: ").lower()
+        
+    if op == "a":
+        var.get_weather()
+    elif op == "b":
+        var.Unidades()
+    elif op == "c":
+        var.mostrar_historial()
+    elif op == "d":
+        var.get_weather_forecast()
+    elif op == "s":
+        despedida = "Saliendo . . ."
+        for caracter in despedida:
+            print(caracter, end=" ")
+>>>>>>> cb5e07ed6759a586210fbe1ce7f022c94c7b904f
     else:
-        print(f"Error: {response.status_code}")
+        print("Dato inválido, vuelva a intentar")
 
+
+
+
+
+
+
+
+<<<<<<< HEAD
 def get_weather_forecast():
     var.ciudad()
     medida = var.medida
@@ -125,3 +159,6 @@ def mostrar_historial():
 
 menu()
 
+=======
+
+>>>>>>> cb5e07ed6759a586210fbe1ce7f022c94c7b904f
