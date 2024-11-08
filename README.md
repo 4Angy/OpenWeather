@@ -13,4 +13,8 @@ docker-compose up -d
 Grupo Guido Van Rossum.
 docker run --env-file .env -p 5000:5000 -ti open_weather_api
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7ad0bd242cf78efbcd4e5ce0015453237c9bec9f
 docker compose run weather_app
