@@ -1,48 +1,180 @@
-import curses
-from var import Unidades, get_weather, get_weather_forecast, mostrar_historial
+import inquirer
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+import requests
+from dotenv import load_dotenv
+import os
+import var  # Asegúrate de que var.py esté en el mismo directorio
 
-def iniciar_menu(stdscr):
-    curses.curs_set(0)
-    curses.start_color()
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
+API_KEY = os.getenv('API_KEY')
+historial = []
+console = Console()
 
-    menu_items = [
-        ("Elegir ciudad", get_weather),
-        ("Cambiar de unidad", Unidades),
-        ("Ver historial", mostrar_historial),
-        ("Clima de los próximos 5 días", get_weather_forecast),
-        ("Salir de la aplicación", None)
-    ]
-
-    current_row = 0
-
+def menu():
     while True:
-        stdscr.clear()
-        stdscr.addstr(0, 0, " * * * Menú Principal * * *", curses.A_BOLD)
-        stdscr.addstr(1, 0, "---------------------------")
+        console.clear()
+        console.print(" * * * Menú Principal * * *", style="bold")
+        
+        opciones = [
+            "Elegir ciudad",
+            "Cambiar de unidad",
+            "Ver historial",
+            "Clima de los próximos 5 días",
+            "Salir"
+        ]
+        
+        preguntas = [
+            inquirer.List('opcion',
+                          message="Seleccione una opción:",
+                          choices=opciones,
+                          ),
+        ]
+        
+        respuesta = inquirer.prompt(preguntas)
+        
+        if respuesta['opcion'] == "Elegir ciudad":
+            get_weather()
+        elif respuesta['opcion'] == "Cambiar de unidad":
+            cambiar_unidad()
+        elif respuesta['opcion'] == "Ver historial":
+            mostrar_historial()
+        elif respuesta['opcion'] == "Clima de los próximos 5 días":
+            get_weather_forecast()
+        elif respuesta['opcion'] == "Salir":
+            console.print("Saliendo . . .", style="bold")
+            break
 
-        for idx, (label, _) in enumerate(menu_items):
-            x = 2
-            y = idx + 2
-            if idx == current_row:
-                stdscr.attron(curses.color_pair(1))
-                stdscr.addstr(y, x, label)
-                stdscr.attroff(curses.color_pair(1))
+def cambiar_unidad():
+    unidades = ["Métrico (°C)", "Imperial (°F)"]
+    preguntas = [
+        inquirer.List('unidad',
+                      message="Seleccione la unidad de medida:",
+                      choices=unidades,
+                      carousel=True  # Permite la navegación con las flechas del teclado
+                      ),
+    ]
+    
+    respuesta = inquirer.prompt(preguntas)
+    
+    if respuesta['unidad'] == "Métrico (°C)":
+        var.units = "metric"
+        var.medida = "°C"
+    elif respuesta['unidad'] == "Imperial (°F)":
+        var.units = "imperial"
+        var.medida = "°F"
+    
+    console.print(f"Unidad de medida cambiada a {var.medida}", style="bold green")
+    input("Presione Enter para continuar...")
+    os.system('cls' if os.name == 'nt' else 'clear')  # Limpiar la pantalla
+
+def get_weather():
+    var.ciudad()
+    medida = var.medida
+    units = var.units
+    ciudad = var.city
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units={units}&lang=es"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        clima = response.json()
+        temp = clima['main']['temp']
+        
+        # Determinar el color basado en la temperatura
+        if temp < 0:
+            color = "blue"
+        elif temp > 30:
+            color = "orange"
+        else:
+            color = "green"
+
+        resultado = Text(f"""Ubicación: {clima.get("name")}
+        Temperatura: {temp}{medida}
+        Sensación Térmica: {clima['main']['feels_like']} {medida}
+        Temperatura Mínima: {clima['main']['temp_min']} {medida}
+        Temperatura Máxima: {clima['main']['temp_max']} {medida}
+        Presión: {clima['main']['pressure']} hPa
+        Humedad: {clima['main']['humidity']}%
+        Viento: Velocidad: {clima['wind']['speed']} m/s Dirección: {clima['wind']['deg']}°
+        Tiempo: {clima['weather'][0]['description']}
+        Visibilidad: {clima['visibility']} metros""", style=color)
+
+        console.print(resultado)
+        historial.append(resultado)
+
+        # Esperar a que el usuario presione una tecla antes de limpiar
+        input("Presione Enter para continuar...")
+        os.system('cls' if os.name == 'nt' else 'clear')  # Limpiar la pantalla
+    elif response.status_code == 404:
+        console.print("La ciudad ingresada no existe, por favor ingrese una ciudad válida")
+        get_weather()
+    else:
+        console.print(f"Error: {response.status_code}")
+
+def get_weather_forecast():
+    var.ciudad()
+    medida = var.medida
+    units = var.units
+    ciudad = var.city
+    url = f"https://api.openweathermap.org/data/2.5/forecast?q={ciudad}&appid={API_KEY}&units={units}&lang=es"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        clima = response.json()
+        console.print(f"Pronóstico para los próximos 5 días en {clima.get('city').get('name')}:\n")
+
+        table = Table(title="Pronóstico del Clima")
+        table.add_column("Fecha y Hora", justify="center")
+        table.add_column("Temperatura", justify="center")
+        table.add_column("Descripción", justify="center")
+
+        forecast_resultado = f"Pronóstico de 5 días para {ciudad}:\n"
+
+        for entry in clima['list']:
+            fecha = entry['dt_txt']
+            temp = entry['main']['temp']
+            
+            # Determinar el color basado en la temperatura
+            if temp < 0:
+                color = "blue"
+            elif temp > 30:
+                color = "orange"
             else:
-                stdscr.addstr(y, x, label)
+                color = "green"
 
-        stdscr.refresh()
-        key = stdscr.getch()
+            weather_desc = entry['weather'][0]['description']
+            table.add_row(fecha, Text(f"{temp}{medida}", style=color), weather_desc)
+            
+            forecast_resultado += f"Fecha y hora: {fecha}, Temperatura: {temp}{medida}, Tiempo: {weather_desc}\n"
 
-        if key == curses.KEY_UP and current_row > 0:
-            current_row -= 1
-        elif key == curses.KEY_DOWN and current_row < len(menu_items) - 1:
-            current_row += 1
-        elif key == ord("\n"):
-            if current_row == len(menu_items) - 1:
-                break
-            selected_function = menu_items[current_row][1]
-            if selected_function:
-                selected_function(stdscr)
+        console.print(table)
 
-curses.wrapper(iniciar_menu)
+        # Agregar el pronóstico al historial
+        historial.append(forecast_resultado)
+
+        # Esperar a que el usuario presione una tecla antes de limpiar
+        input("Presione Enter para continuar...")
+        os.system('cls' if os.name == 'nt' else 'clear')  # Limpiar la pantalla
+    elif response.status_code == 404:
+        console.print("La ciudad ingresada no existe, por favor ingrese una ciudad válida")
+        get_weather_forecast()
+    else:
+        console.print(f"Error: {response.status_code}")
+
+def mostrar_historial():
+    if not historial:
+        console.print("No hay consultas en el Historial")
+    else:
+        console.print("Historial de consultas del clima")
+        for consulta in historial:
+            console.print(consulta)
+            console.print("----------------------------")
+
+    # Esperar a que el usuario presione una tecla antes de limpiar
+    input("Presione Enter para continuar...")
+    os.system('cls' if os.name == 'nt' else 'clear')  # Limpiar la pantalla
+
+# Ejecutar el menú
+menu()

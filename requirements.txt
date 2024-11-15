@@ -1,4 +1,5 @@
 requests
 python-dotenv
-python-time
-python-curses
+datetime
+inquirer
+rich
